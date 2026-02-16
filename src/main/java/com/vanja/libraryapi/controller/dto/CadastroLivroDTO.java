@@ -1,25 +1,26 @@
 package com.vanja.libraryapi.controller.dto;
 
 import com.vanja.libraryapi.model.GeneroLivro;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Past;
+import org.hibernate.validator.constraints.ISBN;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.UUID;
 
-/**
- * "isbn": "string",
- * "titulo": "string",
- * "dataPublicacao": "date",
- * "genero": "enum",
- * "preco": number,
- * "id_autor": "uuid"
- */
-
 public record CadastroLivroDTO(
+        @ISBN
+        @NotBlank(message = "campo obrigatorio")
         String isbn,
+        @NotBlank(message = "campo obrigatorio")
         String titulo,
+        @NotNull(message = "campo obrigatorio")
+        @Past(message = "nao pode ser uma data futura")
         LocalDate dataPublicacao,
         GeneroLivro genero,
+        @NotNull(message = "campo obrigatorio")
         BigDecimal preco,
         UUID idAutor
         ) {
