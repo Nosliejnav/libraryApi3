@@ -2,6 +2,7 @@ package com.vanja.libraryapi.controller;
 
 import com.vanja.libraryapi.controller.dto.AutorDTO;
 import com.vanja.libraryapi.controller.dto.ErroResposta;
+import com.vanja.libraryapi.controller.mappers.AutorMapper;
 import com.vanja.libraryapi.exceptions.OperacaoNaoPermitidaException;
 import com.vanja.libraryapi.exceptions.RegistroDuplicadoException;
 import com.vanja.libraryapi.model.Autor;
@@ -25,19 +26,20 @@ import java.util.stream.Collectors;
 public class AutorController {
 
     private final AutorService service;
+    private final AutorMapper mapper;
 
     @PostMapping
 //    @RequestMapping(method = RequestMethod.POST)
-        public ResponseEntity<Object> salvar(@RequestBody @Valid AutorDTO autor){
+        public ResponseEntity<Object> salvar(@RequestBody @Valid AutorDTO dto){
         try {
-        Autor autorEntidade = autor.mapearParaAutor();
-        service.salvar(autorEntidade);
+        Autor autor = mapper.toEntity(dto);
+        service.salvar(autor);
 
         // http://localhost:8080/autores/20b2e42b-7ceb-4ad9-bdf9-ed848e713026
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(autorEntidade.getId())
+                .buildAndExpand(autor.getId())
                 .toUri();
 
         return ResponseEntity.created(location).build();
@@ -51,15 +53,20 @@ public class AutorController {
     public ResponseEntity<AutorDTO> obterDetalhes(@PathVariable/*Não e obrigatorio -> ("id")*/ String id ){
         var idAutor = UUID.fromString(id);
         Optional<Autor> autorOptional = service.obterPorId(idAutor);
-        if (autorOptional.isPresent()){
-            Autor autor = autorOptional.get();
-            AutorDTO dto = new AutorDTO(
-                    autor.getId(),
-                    autor.getNome(),
-                    autor.getDataNascimento(),autor.getNacionalidade());
-            return ResponseEntity.ok/* Não precisa colocar o ".build()" pois já vem oculto*/(dto);
-        }
-        return ResponseEntity.notFound().build();
+
+        return service
+                .obterPorId(idAutor)
+                .map(autor -> {
+                    AutorDTO dto = mapper.toDTO(autor);
+                    return ResponseEntity.ok(dto);
+                }).orElseGet(() -> ResponseEntity.notFound().build());
+
+//        if (autorOptional.isPresent()){
+//            Autor autor = autorOptional.get();
+//            AutorDTO dto = mapper.toDTO(autor);
+//            return ResponseEntity.ok(dto);
+//        }
+//        return ResponseEntity.notFound().build();
     }
 
     // indempontente
