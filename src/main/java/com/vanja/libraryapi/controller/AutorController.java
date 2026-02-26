@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/autores")
 @RequiredArgsConstructor
 // http://localhost:8080/autores
-public class AutorController {
+public class AutorController implements GenericController{
 
     private final AutorService service;
     private final AutorMapper mapper;
@@ -32,17 +32,10 @@ public class AutorController {
 //    @RequestMapping(method = RequestMethod.POST)
         public ResponseEntity<Object> salvar(@RequestBody @Valid AutorDTO dto){
         try {
-        Autor autor = mapper.toEntity(dto);
-        service.salvar(autor);
-
-        // http://localhost:8080/autores/20b2e42b-7ceb-4ad9-bdf9-ed848e713026
-        URI location = ServletUriComponentsBuilder
-                .fromCurrentRequest()
-                .path("/{id}")
-                .buildAndExpand(autor.getId())
-                .toUri();
-
-        return ResponseEntity.created(location).build();
+            Autor autor = mapper.toEntity(dto);
+            service.salvar(autor);
+            URI location = gerarHeaderLocation(autor.getId());
+            return ResponseEntity.created(location).build();
         } catch (RegistroDuplicadoException e){
             var erroDTO = ErroResposta.conflito(e.getMessage());
             return ResponseEntity.status(erroDTO.status()).body(erroDTO);
