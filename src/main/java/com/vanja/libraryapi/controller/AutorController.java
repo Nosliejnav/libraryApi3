@@ -23,27 +23,23 @@ import java.util.stream.Collectors;
 @RequestMapping("/autores")
 @RequiredArgsConstructor
 // http://localhost:8080/autores
-public class AutorController implements GenericController{
+public class AutorController implements GenericController {
 
     private final AutorService service;
     private final AutorMapper mapper;
 
     @PostMapping
 //    @RequestMapping(method = RequestMethod.POST)
-        public ResponseEntity<Object> salvar(@RequestBody @Valid AutorDTO dto){
-        try {
-            Autor autor = mapper.toEntity(dto);
-            service.salvar(autor);
-            URI location = gerarHeaderLocation(autor.getId());
-            return ResponseEntity.created(location).build();
-        } catch (RegistroDuplicadoException e){
-            var erroDTO = ErroResposta.conflito(e.getMessage());
-            return ResponseEntity.status(erroDTO.status()).body(erroDTO);
-        }
+    public ResponseEntity<Void> salvar(@RequestBody @Valid AutorDTO dto) {
+
+        Autor autor = mapper.toEntity(dto);
+        service.salvar(autor);
+        URI location = gerarHeaderLocation(autor.getId());
+        return ResponseEntity.created(location).build();
     }
 
     @GetMapping("{id}")
-    public ResponseEntity<AutorDTO> obterDetalhes(@PathVariable/*Não e obrigatorio -> ("id")*/ String id ){
+    public ResponseEntity<AutorDTO> obterDetalhes(@PathVariable/*Não e obrigatorio -> ("id")*/ String id) {
         var idAutor = UUID.fromString(id);
         Optional<Autor> autorOptional = service.obterPorId(idAutor);
 
@@ -64,31 +60,24 @@ public class AutorController implements GenericController{
 
     // indempontente
     @DeleteMapping("{id}")
-    public ResponseEntity<Object> deletar(@PathVariable("id")String id){
+    public ResponseEntity<Void> deletar(@PathVariable("id") String id) {
+        var idAutor = UUID.fromString(id);
+        Optional<Autor> autorOptional = service.obterPorId(idAutor);
 
-        try {
-            var idAutor = UUID.fromString(id);
-            Optional<Autor> autorOptional = service.obterPorId(idAutor);
-
-            if(autorOptional.isEmpty()){
-                return ResponseEntity.notFound().build();
-            }
-
-            service.deletar(autorOptional.get());
-
-            return ResponseEntity.noContent().build();
-        }catch (OperacaoNaoPermitidaException e){
-            var erroResposta = ErroResposta.respostaPadrao(e.getMessage());
-            return ResponseEntity.status(erroResposta.status()).body( erroResposta);
+        if (autorOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
 
+        service.deletar(autorOptional.get());
+
+        return ResponseEntity.noContent().build();
 
     }
 
     @GetMapping
     public ResponseEntity<List<AutorDTO>> pesquisar(
-            @RequestParam(value = "nome", required = false)String nome,
-            @RequestParam(value = "nacionalidade", required = false)String nacionalidade){
+            @RequestParam(value = "nome", required = false) String nome,
+            @RequestParam(value = "nacionalidade", required = false) String nacionalidade) {
         List<Autor> resultado = service.PesquisaByExample(nome, nacionalidade);
         List<AutorDTO> lista = resultado
                 .stream()
@@ -99,30 +88,25 @@ public class AutorController implements GenericController{
     }
 
     @PutMapping("{id}")
-    public ResponseEntity<Object> atualizar(
+    public ResponseEntity<Void> atualizar(
             //Visualizar Mudança
-            @PathVariable("id") String id,@RequestBody @Valid AutorDTO dto){
+            @PathVariable("id") String id, @RequestBody @Valid AutorDTO dto) {
 
-        try {
+        var idAutor = UUID.fromString(id);
+        Optional<Autor> autorOptional = service.obterPorId(idAutor);
 
-            var idAutor = UUID.fromString(id);
-            Optional<Autor> autorOptional = service.obterPorId(idAutor);
-
-            if(autorOptional.isEmpty()){
-                return ResponseEntity.notFound().build();
-            }
-
-            var autor = autorOptional.get();
-            autor.setNome(dto.nome());
-            autor.setNacionalidade(dto.nacionalidade());
-            autor.setDataNascimento(dto.dataNascimento());
-
-            service.atualizar(autor);
-
-            return  ResponseEntity.noContent().build();
-        } catch (RegistroDuplicadoException e){
-            var erroDTO = ErroResposta.conflito(e.getMessage());
-            return ResponseEntity.status(erroDTO.status()).body(erroDTO);
+        if (autorOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
+
+        var autor = autorOptional.get();
+        autor.setNome(dto.nome());
+        autor.setNacionalidade(dto.nacionalidade());
+        autor.setDataNascimento(dto.dataNascimento());
+
+        service.atualizar(autor);
+
+        return ResponseEntity.noContent().build();
+
     }
 }
