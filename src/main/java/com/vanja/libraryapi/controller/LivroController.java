@@ -2,6 +2,7 @@ package com.vanja.libraryapi.controller;
 
 import com.vanja.libraryapi.controller.dto.CadastroLivroDTO;
 import com.vanja.libraryapi.controller.dto.ErroResposta;
+import com.vanja.libraryapi.controller.dto.ResultadoPesquisaLivroDTO;
 import com.vanja.libraryapi.controller.mappers.LivroMapper;
 import com.vanja.libraryapi.exceptions.RegistroDuplicadoException;
 import com.vanja.libraryapi.model.Livro;
@@ -9,10 +10,9 @@ import com.vanja.libraryapi.service.LivroService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("livros")
@@ -33,5 +33,15 @@ public class LivroController implements GenericController {
         var url = gerarHeaderLocation(livro.getId());
         // retornar codigo created com header location
         return ResponseEntity.created(url).build();
+    }
+
+    @GetMapping("{id}")
+    public ResponseEntity<ResultadoPesquisaLivroDTO> obterDetalhes(
+            @PathVariable("id") String id){
+        return service.obterPorId(UUID.fromString(id))
+                .map(livro -> {
+                    var dto = mapper.toDTO(livro);
+                    return ResponseEntity.ok(dto);
+                }).orElseGet(() -> ResponseEntity.notFound().build() );
     }
 }
