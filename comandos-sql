@@ -26,3 +26,14 @@ create table livro (
    id_autor uuid not null references autor(id),
    constraint chk_genero check (genero in ('FICCAO', 'FANTASIA', 'MISTERIO','ROMANCE', 'BIOGRAFIA', 'CIENCIA') )
 );
+
+-- NÃO E COMUM
+-- select extract(year from data_publicacao) from livro;
+
+-- MAIS USUAL JÁ TRAS A DATA E TUDO MAIS EM SEU QUADRADO
+select to_char(data_publicacao, 'DD/MM/YYYY') from livro;
+select to_char(data_publicacao, 'YYYY') from livro;
+
+
+-- DA ERRO NÃO TEM NO POSTGRES
+-- select year(data_publicacao) from livro;
