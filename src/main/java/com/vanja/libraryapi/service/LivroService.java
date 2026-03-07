@@ -3,7 +3,6 @@ package com.vanja.libraryapi.service;
 import com.vanja.libraryapi.model.GeneroLivro;
 import com.vanja.libraryapi.model.Livro;
 import com.vanja.libraryapi.repository.LivroRepository;
-import com.vanja.libraryapi.repository.specs.LivroSpecs;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -12,6 +11,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.vanja.libraryapi.repository.specs.LivroSpecs.*;
 
 @Service
 @RequiredArgsConstructor
@@ -44,28 +44,20 @@ public class LivroService {
 //                ;
 
         // select * from livro where 0 = 0
-
         Specification<Livro> specs = Specification.where((root, query, cb) -> cb.conjunction());
 
         if (isbn != null){
             // query = query and isbn = :isbn
-            specs = specs.and(LivroSpecs.isbnEqual(isbn));
+            specs = specs.and(isbnEqual(isbn));
         }
 
         if (titulo != null){
-            specs = specs.and(LivroSpecs.tituloLike(titulo));
+            specs = specs.and(tituloLike(titulo));
         }
 
         if(genero != null){
-            specs = specs.and(LivroSpecs.generoEqual(genero));
+            specs = specs.and(generoEqual(genero));
         }
-
-//        Não mais usual depopis de criar o pacote e classe specs
-        //        // where isbn =:isbn
-//        Specification<Livro> isbnEqual = (root, query, cb ) ->
-//                cb.equal(root.get("isbn"), isbn);
-
-//        return repository.findAll(LivroSpecs.isbnEqual(isbn));
 
         return repository.findAll(specs);
     }
