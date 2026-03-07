@@ -33,7 +33,7 @@ public class LivroService {
 
     // isbn, titulo, nome autor, genero, ano de publicação
     public List<Livro> pesquisa(
-            String isbn, String titulo, String nomeAutor, GeneroLivro genero, Integer anoPublicao){
+            String isbn, String titulo, String nomeAutor, GeneroLivro genero, Integer anoPublicacao){
 
         // select * from livro where isbn = :isbn and nomeAutor =
 
